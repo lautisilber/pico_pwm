@@ -16,11 +16,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 add_subdirectory(StomaSense)
+add_subdirectory(Welfords)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     pico_stdlib
     hardware_pwm
-    
+
     pico_async_context_freertos
     FreeRTOS-Kernel-Heap4
     ArduinoJson

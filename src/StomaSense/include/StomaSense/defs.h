@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <hardware/watchdog.h>
+#include <pico/time.h>
 
 #include <limits>
 #include <type_traits>
@@ -18,50 +19,53 @@
 
 #define STOMA_SENSE_MAX_WATERING_GOALS_STACK 32
 
-#define _STOMASENSE_PRINT_INTERNAL(level, msg, ...)          \
+#define _STOMASENSE_PRINT_INTERNAL(level, ...)          \
     do                                                       \
     {                                                        \
         printf("%s | %s:%u -> ", level, __FILE__, __LINE__); \
-        printf(msg, __VA_ARGS__);                            \
+        printf(__VA_ARGS__);                            \
     } while (0)
-#define STOMASENSE_DEBUG(msg, ...) _STOMASENSE_PRINT_INTERNAL("DEBUG", msg, __VA_ARGS__)
-#define STOMASENSE_WARN(msg, ...) _STOMASENSE_PRINT_INTERNAL("WARN", msg, __VA_ARGS__)
-#define STOMASENSE_ERROR(msg, ...) _STOMASENSE_PRINT_INTERNAL("ERROR", msg, __VA_ARGS__)
-#define STOMASENSE_PANIC(msg, ...)                             \
+#define STOMASENSE_DEBUG(...) _STOMASENSE_PRINT_INTERNAL("DEBUG", __VA_ARGS__)
+#define STOMASENSE_WARN(...) _STOMASENSE_PRINT_INTERNAL("WARN", __VA_ARGS__)
+#define STOMASENSE_ERROR(...) _STOMASENSE_PRINT_INTERNAL("ERROR", __VA_ARGS__)
+#define STOMASENSE_PANIC(...)                             \
     do                                                         \
     {                                                          \
-        _STOMASENSE_PRINT_INTERNAL("PANIC", msg, __VA_ARGS__); \
+        _STOMASENSE_PRINT_INTERNAL("PANIC", __VA_ARGS__); \
         watchdog_reboot(0, 0, 1000);                           \
     } while (0)
 
 namespace StomaSense
 {
-
     typedef unsigned long (*const millis_t)(void);
-
+    
     typedef uint8_t scale_t;
     typedef int32_t stepper_pos_t;
     typedef uint8_t servo_angle_t;
-
+    
     typedef uint8_t watering_goal_idx_t;
     typedef uint8_t pump_intensity_t;
-
+    
     typedef unsigned long time_ms_t;
-
+    
     typedef float weight_t;
-
+    
     static_assert(STOMA_SENSE_N_SCALES >= (1 << sizeof(scale_t)) - 1,
-                  "scale_t type is not large enough to store STOMA_SENSE_N_SCALES scales");
-
+    "scale_t type is not large enough to store STOMA_SENSE_N_SCALES scales");
+    
     static_assert(std::is_unsigned<scale_t>::value, "scale_t type should be unsigned");
     static_assert(STOMA_SENSE_STEPPER_MAX_POS >= (1 << sizeof(stepper_pos_t)) - 1 &&
-                      STOMA_SENSE_STEPPER_MIN_POS <= (1 << sizeof(stepper_pos_t)) - 1,
-                  "stepper_pos_t type is not large enough to store all stepper positions");
+    STOMA_SENSE_STEPPER_MIN_POS <= (1 << sizeof(stepper_pos_t)) - 1,
+    "stepper_pos_t type is not large enough to store all stepper positions");
     static_assert(STOMA_SENSE_SERVO_MAX_ANGLE >= (1 << sizeof(servo_angle_t)) - 1,
-                  "servo_angle_t type is not large enough to store STOMA_SENSE_SERVO_MAX_ANGLE angles");
-
+    "servo_angle_t type is not large enough to store STOMA_SENSE_SERVO_MAX_ANGLE angles");
+    
     static_assert(STOMA_SENSE_MAX_WATERING_GOALS_STACK >= (1 << sizeof(watering_goal_idx_t)) - 1,
-                  "goal_idx_t type is not large enough to store STOMA_SENSE_MAX_WATER_PLANNING_STACK water planning goals");
+    "goal_idx_t type is not large enough to store STOMA_SENSE_MAX_WATER_PLANNING_STACK water planning goals");
+    
+    extern time_ms_t millis() {
+        return to_ms_since_boot(get_absolute_time());
+    }
 
     inline bool has_timer_elapsed(time_ms_t curr_millis, time_ms_t start_time, time_ms_t timedelta)
     {
@@ -110,15 +114,6 @@ namespace StomaSense
         const T slope = out_range / in_range;
         return (value - in_min) * slope + out_min;
     }
-
-    // struct Jsonifyable
-    // {
-    //     virtual void to_json(JsonObject *obj) const = 0;
-    //     bool to_stream(Stream *stream, bool pretty) const;
-
-    //     virtual bool from_json(JsonObject *obj) = 0;
-    //     bool from_stream(Stream *stream);
-    // };
 
 }
 

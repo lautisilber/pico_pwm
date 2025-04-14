@@ -1,8 +1,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
-#include <ArduinoJson.h>
-#include <StomaSense/defs.h>
 #include <pico/stdlib.h>
+
+#include <ArduinoJson.h>
+
+#include <StomaSense/defs.h>
+#include <StomaSense/protocol.h>
 
 #define LED_PIN 25
 

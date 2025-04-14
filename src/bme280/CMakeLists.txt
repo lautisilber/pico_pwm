@@ -1,11 +1,7 @@
-set(LIB_NAME StomaSense)
+set(LIB_NAME bme280)
 
 add_library(${LIB_NAME} STATIC
-    defs.cpp
-    protocol.cpp
-    stream.cpp
-    jsonifyable.cpp
-    protocol_json.cpp
+    bme280.cpp
 )
 
 # target_sources(${LIB_NAME} PRIVATE )
@@ -15,8 +11,9 @@ target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includ
 
 target_link_libraries(${LIB_NAME} PRIVATE
     pico_stdlib
-    pico_time
-    hardware_watchdog
+    hardware_i2c
 
-    ArduinoJson
+    StomaSense
+
+    BME280_SensorAPI
 )
