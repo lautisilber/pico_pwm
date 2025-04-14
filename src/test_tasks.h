@@ -33,7 +33,7 @@ void led_fade_task(void *params) {
     constexpr uint16_t pwm_wrap = 255;
     // Set up PWM
     gpio_set_function(LED_PIN, GPIO_FUNC_PWM);
-    uint slice_num = pwm_gpio_to_slice_num(LED_PIN);
+    StomaSense::pin_size_t slice_num = pwm_gpio_to_slice_num(LED_PIN);
     pwm_set_wrap(slice_num, pwm_wrap);
     pwm_set_enabled(slice_num, true);
 

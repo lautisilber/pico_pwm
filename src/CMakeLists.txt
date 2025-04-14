@@ -16,7 +16,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 add_subdirectory(StomaSense)
-add_subdirectory(Welfords)
+add_subdirectory(welfords)
+add_subdirectory(bme280)
+add_subdirectory(hx711)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     pico_stdlib

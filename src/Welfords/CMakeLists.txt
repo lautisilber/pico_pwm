@@ -1,4 +1,4 @@
-set(LIB_NAME Welfords)
+set(LIB_NAME welfords)
 
 add_library(${LIB_NAME} STATIC
     welfords.cpp

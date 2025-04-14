@@ -38,6 +38,8 @@
 namespace StomaSense
 {
     typedef unsigned long (*const millis_t)(void);
+
+    typedef uint8_t pin_size_t;
     
     typedef uint8_t scale_t;
     typedef int32_t stepper_pos_t;

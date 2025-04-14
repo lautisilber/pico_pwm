@@ -3,7 +3,7 @@
 
 #include <pico/stdlib.h>
 
-namespace BME280
+namespace bme280
 {
     extern bool begin();
     extern bool read(float *hum, float *temp, float *pres);

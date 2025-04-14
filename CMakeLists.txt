@@ -18,5 +18,12 @@ pico_sdk_init()
 # initialize libs
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib)
 
+if (NOT TARGET BME280_SensorAPI)
+    message(FATAL_ERROR "Didn't load BME280_SensorAPI")
+endif()
+if (NOT TARGET ArduinoJson)
+    message(FATAL_ERROR "Didn't load ArduinoJson")
+endif()
+
 # rest of your project
 add_subdirectory(src)

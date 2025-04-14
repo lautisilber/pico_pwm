@@ -6,8 +6,10 @@
 //
 
 #include <StomaSense/jsonifyable.h>
+#include <ArduinoJson.h>
 
 using namespace StomaSense;
+// using namespace ArduinoJson;
 
 bool Jsonifyable::to_stream(Stream *stream, bool pretty) const {
     JsonDocument doc;

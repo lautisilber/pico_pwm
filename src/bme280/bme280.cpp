@@ -7,7 +7,8 @@
 
 #include <hardware/i2c.h>
 
-using namespace BME280;
+using namespace bme280;
+using namespace StomaSense;
 
 // i2c callbacks ////////
 // typedef BME280_INTF_RET_TYPE (*bme280_read_fptr_t)(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
@@ -69,7 +70,7 @@ const bme280_settings settings = {
 static uint32_t max_delay_us = 1000000;
 static StomaSense::time_ms_t last_read_time = 0;
 
-bool sleep()
+bool bme280::sleep()
 {
     int8_t res = bme280_set_sensor_mode(BME280_POWERMODE_SLEEP, &bme);
     if (res > 0)
@@ -84,7 +85,7 @@ bool sleep()
     return res >= 0;
 }
 
-bool wake_up()
+bool bme280::wake_up()
 {
     int8_t res = bme280_set_sensor_mode(BME280_POWERMODE_FORCED, &bme);
     if (res > 0)
@@ -99,7 +100,7 @@ bool wake_up()
     return res >= 0;
 }
 
-bool reset()
+bool bme280::reset()
 {
     int8_t res = bme280_soft_reset(&bme);
     if (res > 0)
@@ -168,7 +169,7 @@ static inline bool set_meas_delay()
     return res >= 0;
 }
 
-bool begin()
+bool bme280::begin()
 {
     if (!init())
         return false;
@@ -179,14 +180,14 @@ bool begin()
     return true;
 }
 
-bool can_read()
+bool bme280::can_read()
 {
     return has_timer_elapsed(millis(), last_read_time, max_delay_us / 1000);
 }
 
-bool read(float *hum, float *temp, float *pres)
+bool bme280::read(float *hum, float *temp, float *pres)
 {
-    if (!can_read())
+    if (!bme280::can_read())
     {
         STOMASENSE_WARN("can't read bme280. have to wait a bit");
         return false;
