@@ -3,6 +3,10 @@
 
 #include <pico/stdlib.h>
 
+#if __cplusplus
+extern "C" {
+#endif
+
 // you need to define this function
 extern void pico_stepper_delay_us(uint32_t delay);
 
@@ -20,7 +24,6 @@ struct PicoStepper
 
     bool inverted;
 
-    int8_t curr_step;
     int32_t curr_pos;
 
     bool init_flag;
@@ -32,14 +35,11 @@ extern void pico_stepper_release(const struct PicoStepper *stepper);
 extern void pico_stepper_move_steps(struct PicoStepper *stepper, int32_t steps);
 extern void pico_stepper_move_to_pos(struct PicoStepper *stepper, int32_t pos);
 
-int32_t pico_stepper_get_curr_pos(const struct PicoStepper *stepper)
-{
-    return stepper->curr_pos;
-}
+extern int32_t pico_stepper_get_curr_pos(const struct PicoStepper *stepper);
+extern void pico_stepper_set_curr_pos_forced(struct PicoStepper *stepper, int32_t pos);
 
-void pico_stepper_set_curr_pos_forced(struct PicoStepper *stepper, int32_t pos)
-{
-    stepper->curr_pos = pos;
+#if __cplusplus
 }
+#endif
 
 #endif /* _PICO_STEPPER_H_ */

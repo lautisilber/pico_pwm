@@ -16,10 +16,6 @@ public:
         return stdio_getchar_timeout_us(1000);
     }
 
-    size_t available() override {
-        return true;
-    }
-
     static inline void set_available_cb(void (*fn)(void*))
     {
         stdio_set_chars_available_callback(fn, NULL);

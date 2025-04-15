@@ -125,26 +125,18 @@ public:
 typedef void (*smartCmdCB_t)(printf_like_fn, const SmartCmdArguments *, const char *);
 typedef void (*serialDefaultCmdCB_t)(printf_like_fn, const char *);
 
-void __defaultCommandNotRecognizedCB(printf_like_fn *print, const char *cmd);
+extern void __defaultCommandNotRecognizedCB(printf_like_fn print, const char *cmd);
 
-class SmartCmdBase
+class SmartCmd
 {
 protected:
     const char *_cmd;
     smartCmdCB_t _cb;
 
 public:
-    SmartCmdBase(const char *command, smartCmdCB_t callback);
-    virtual bool is_command(const char *str) const = 0;
-    virtual void callback(printf_like_fn printf_like, const SmartCmdArguments *args) const = 0;
-};
-
-class SmartCmd : public SmartCmdBase
-{
-public:
     SmartCmd(const char *command, smartCmdCB_t callback);
     bool is_command(const char *str) const;
-    void callback(printf_like_fn *pintf_like, const SmartCmdArguments *args) const;
+    void callback(printf_like_fn printf_like, const SmartCmdArguments *args) const;
 };
 
 #define SMART_CMD_CREATE(className, command, callback) \
@@ -163,40 +155,47 @@ private:
     printf_like_fn _printf = nullptr;
     const mutex_manip_blocking_t _mutex_buffer_claim_blocking;
     const mutex_manip_blocking_t _mutex_buffer_release;
-    const SmartCmdBase *const *const _cmds;
+    const SmartCmd *const *const _cmds;
     serialDefaultCmdCB_t _defaultCB;
     const char _endChar, _sepChar;
     StomaSense::Array<char, size_t, STREAM_BUFFER_LEN + 1> _buffer;
 
 public:
-    constexpr SmartComm(const SmartCmdBase *const cmds[N_CMDS], printf_like_fn printf_like, mutex_manip_blocking_t mutex_buffer_claim_blocking, mutex_manip_blocking_t mutex_buffer_release, char endChar = '\n', char sepChar = ' ', serialDefaultCmdCB_t defaultCB = __defaultCommandNotRecognizedCB);
+    constexpr SmartComm(const SmartCmd *const cmds[N_CMDS], printf_like_fn printf_like, mutex_manip_blocking_t mutex_buffer_claim_blocking, mutex_manip_blocking_t mutex_buffer_release, char endChar = '\n', char sepChar = ' ', serialDefaultCmdCB_t defaultCB = __defaultCommandNotRecognizedCB);
 
     bool put_char_in_buff(char c);
     void tick();
 };
 
 template <_smart_comm_size_t N_CMDS>
-constexpr SmartComm<N_CMDS>::SmartComm(const SmartCmdBase *const cmds[N_CMDS], printf_like_fn printf_like, mutex_manip_blocking_t mutex_buffer_claim_blocking, mutex_manip_blocking_t mutex_buffer_release, char endChar, char sepChar, serialDefaultCmdCB_t defaultCB)
+constexpr SmartComm<N_CMDS>::SmartComm(const SmartCmd *const cmds[N_CMDS], printf_like_fn printf_like, mutex_manip_blocking_t mutex_buffer_claim_blocking, mutex_manip_blocking_t mutex_buffer_release, char endChar, char sepChar, serialDefaultCmdCB_t defaultCB)
     : _cmds(cmds), _printf(printf_like), _mutex_buffer_claim_blocking(mutex_buffer_claim_blocking), _mutex_buffer_release(mutex_buffer_release), _defaultCB(defaultCB), _endChar(endChar), _sepChar(sepChar)
 {
     static_assert(N_CMDS <= MAX_COMMANDS, "Can't have this many commands");
-    _buffer.fill(0);
 }
 
 template <_smart_comm_size_t N_CMDS>
 bool SmartComm<N_CMDS>::put_char_in_buff(char c)
 {
+    if (_mutex_buffer_claim_blocking)
+        _mutex_buffer_claim_blocking();
     if (_buffer.size() >= STREAM_BUFFER_LEN) {
         char v;
         _buffer.pop_front(&v);
     }
-    return _buffer.append(c);
+    bool s = _buffer.append(c);
+    if (_mutex_buffer_release)
+        _mutex_buffer_release();
+    return s;
 }
 
 template <_smart_comm_size_t N_CMDS>
 void SmartComm<N_CMDS>::tick()
 {
     size_t end_char_idx;
+
+    if (_mutex_buffer_claim_blocking)
+        _mutex_buffer_claim_blocking();
     if (_buffer.contains(_endChar, &end_char_idx))
     {
         _SMART_COMM_DEBUG_PRINT_STATIC("SMARTCOMM DEBUG: Processing message: '");
@@ -209,7 +208,7 @@ void SmartComm<N_CMDS>::tick()
         if (__extractArguments(_buffer._c_array_unsafe(), _endChar, _sepChar, command, args, nArgs))
         {
             // get the serial command selected
-            const SmartCmdBase *sc = NULL;
+            const SmartCmd *sc = NULL;
             for (_smart_comm_size_t i = 0; i < N_CMDS; i++)
             {
                 if (!_cmds[i])
@@ -245,6 +244,8 @@ void SmartComm<N_CMDS>::tick()
         memset(_buffer._c_array_unsafe(), '\0', STREAM_BUFFER_LEN);
         _buffer._set_c_array_size_unsafe(0);
     }
+    if (_mutex_buffer_release)
+        _mutex_buffer_release();
 }
 
 #endif /* _SIMPLE_COMM_H_ */

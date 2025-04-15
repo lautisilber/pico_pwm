@@ -2,49 +2,69 @@
 #include <stdio.h>
 #include <StomaSense/defs.h>
 #include <StomaSense/pin_defs.h>
-// #include <tusb.h>
-// #include <SmartComm.h>
+#include <SmartComm.h>
 
-// class StdioStream : public StomaSense::Stream
-// {
-// public:
-//     size_t write(uint8_t c) override {
-//         return stdio_putchar(c);
-//     }
+#include <PicoPWM.h>
+#include <PicoStepper.h>
+#include <PicoServo.h>
 
-//     int read() override {
-//         return stdio_getchar_timeout_us(1000);
-//     }
-
-//     size_t available() override {
-//         uint8_t c;
-//         tud_task();
-//         return tud_cdc_peek(&c) ? (int) c : -1;
-//     }
-// };
+void pico_stepper_delay_us(uint32_t us) {
+    sleep_us(us);
+}
 
 using namespace StomaSense;
 
-// StdioStream stdio_stream;
-
 // // create the "OK" command which only answers with "OK"
-// SMART_CMD_CREATE(cmdOk, "OK", [](Stream *stream, const SmartCmdArguments *args, const char *cmd) {
-//     stream->println("OK");
+// SMART_CMD_CREATE(cmdOk, "OK", [](printf_like_fn printf_like, const SmartCmdArguments *args, const char *cmd) {
+//     printf_like("OK");
 // });
 
 // // create the array of commands (note the & before the class names)
-// const SmartCmdBase *cmds[] = {
+// const SmartCmd *cmds[] = {
 //     &cmdOk//, &cmdHello, &cmdOne
 // };
 
 // // create the CmartComm main class with the length of the cmds array
 // // between angled brackets <>
-// SmartComm<ARRAY_LENGTH(cmds)> sc(cmds, stdio_stream);
+// SmartComm<ARRAY_LENGTH(cmds)> sc(cmds, printf, nullptr, nullptr);
 
+// void char_available_cb(void *params)
+// {
+//     int c;
+//     while ((c = getchar_timeout_us(0)) != PICO_ERROR_TIMEOUT) {
+//         if (c < 0) break;
+//         if (!sc.put_char_in_buff(c)) break;
+//     }
+// }
+
+static PicoStepper stepper;
+static PicoPWM pump;
+static PicoServo servo(SERVO_PIN);
+
+void test_stepper()
+{
+    printf("Stepper test start\n");
+    pico_stepper_init(
+        &stepper,
+        STEPPER_PIN_1, STEPPER_PIN_2, STEPPER_PIN_3, STEPPER_PIN_4,
+        PicoStepperStepType::PICO_STEPPER_STEP_TYPE_HALF, true);
+    printf("Stepper init\n");
+    
+    pico_stepper_set_curr_pos_forced(&stepper, 0);
+    printf("Stepper pos: %li\n", pico_stepper_get_curr_pos(&stepper));
+    pico_stepper_move_to_pos(&stepper, 500);
+    printf("Stepper pos: %li\n", pico_stepper_get_curr_pos(&stepper));
+    sleep_ms(1000);
+    pico_stepper_move_to_pos(&stepper, 0);
+    printf("Stepper pos: %li\n", pico_stepper_get_curr_pos(&stepper));
+    printf("Stepper test end\n");
+    pico_stepper_release(&stepper);
+}
 
 
 int main() {
     stdio_init_all();
+    // stdio_set_chars_available_callback(char_available_cb, nullptr);
 
     for (;;)
     {
@@ -52,15 +72,25 @@ int main() {
         if (c < 0) continue;
 
         switch(c) {
-        case 'a':
+        case 'h':
+            printf("o");
+            break;
+        case 'o':
             printf("OK");
             break;
+        case 's':
+            test_stepper();
+            break;
         default:
-           putchar(c);
-           break;
+            // putchar(c);
+            printf("Error");
+            break;
         }
+        putchar('\n');
     }
-    sleep_ms(1);
+
+    // sc.tick();
+    // sleep_ms(1);
 
     // gpio_init(LED_PIN);
     // gpio_set_dir(LED_PIN, GPIO_OUT);

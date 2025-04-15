@@ -179,9 +179,7 @@ bool SmartCmdArguments::to<bool>(_smart_comm_size_t n, bool *t) const
 
 /// SmartCmds /////////////////////////////////////////////////////////////////////////////////
 
-SmartCmdBase::SmartCmdBase(const char *command, smartCmdCB_t callback): _cmd(command), _cb(callback) {}
-
-SmartCmd::SmartCmd(const char *command, smartCmdCB_t callback): SmartCmdBase(command, callback) {}
+SmartCmd::SmartCmd(const char *command, smartCmdCB_t callback): _cmd(command), _cb(callback) {}
 bool SmartCmd::is_command(const char *str) const { return strcmp(str, _cmd) == 0; }
 void SmartCmd::callback(printf_like_fn printf_like, const SmartCmdArguments *args) const { _cb(printf_like, args, _cmd); }
 

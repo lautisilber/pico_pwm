@@ -23,7 +23,7 @@ namespace StomaSense
         static_assert(std::is_unsigned<IDX>::value, "IDX should be an unsigned integral type (for example uint)");
 
     private:
-        T _data[N];
+        T _data[N] = {0};
         IDX _size = 0;
 
         void _swap(IDX i, IDX j)
@@ -167,7 +167,7 @@ namespace StomaSense
 
         // casting & data
         const T *c_array() const { return _data; }
-        T *_c_array_unsafe() const { return _data; }
+        T *_c_array_unsafe() { return _data; }
         void _set_c_array_size_unsafe(size_t size)
         {
             // this can be used in conjunction with _c_array_unsafe()
