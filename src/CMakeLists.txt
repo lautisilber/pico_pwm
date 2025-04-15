@@ -16,9 +16,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 add_subdirectory(StomaSense)
-add_subdirectory(welfords)
 add_subdirectory(bme280)
 add_subdirectory(hx711)
+add_subdirectory(SmartComm)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     pico_stdlib
@@ -29,6 +29,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ArduinoJson
 
     StomaSense
+    SmartComm
 )
 
 if (NOT TARGET tinyusb_device)

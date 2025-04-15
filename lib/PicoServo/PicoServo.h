@@ -69,24 +69,24 @@ public:
 
     // attach the given pin to the next free channel, sets pinMode, min, and max values for write().
     // returns channel number or 0 if failure.
-    bool attach(int min, int max);
+    bool attach(uint32_t min, uint32_t max);
 
     // attach the given pin to the next free channel, sets pinMode, min, and max values for write(),
     // and sets the initial value, the same as write().
     // returns channel number or 0 if failure.
-    bool attach(int min, int max, int value);
+    bool attach(uint32_t min, uint32_t max, uint32_t value);
 
     void detach();
-    void write(int value);             // if value is < 200 its treated as an angle, otherwise as pulse width in microseconds
-    void writeMicroseconds(int value); // Write pulse width in microseconds
-    bool attached();                   // return true if this servo is attached, otherwise false
+    void write(uint8_t angle);              // if value is < 200 its treated as an angle, otherwise as pulse width in microseconds
+    void writeMicroseconds(uint32_t value); // Write pulse width in microseconds
+    bool attached();                        // return true if this servo is attached, otherwise false
 
 private:
     bool     _attached = false;
     const uint8_t  _pin;
-    int _minUs = DEFAULT_MIN_PULSE_WIDTH;
-    int _maxUs = DEFAULT_MAX_PULSE_WIDTH;
-    int _valueUs = DEFAULT_NEUTRAL_PULSE_WIDTH;
+    uint32_t _minUs = DEFAULT_MIN_PULSE_WIDTH;
+    uint32_t _maxUs = DEFAULT_MAX_PULSE_WIDTH;
+    uint32_t _valueUs = DEFAULT_NEUTRAL_PULSE_WIDTH;
 
     struct PIOProgram
     {

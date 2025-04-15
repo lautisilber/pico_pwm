@@ -9,6 +9,7 @@
 #define _STOMA_SENSE_DATATYPES_H_
 
 #include <initializer_list>
+#include <cstring>
 
 namespace StomaSense {
 
@@ -29,13 +30,13 @@ private:
     }
     
 public:
-    IDX size() const volatile { return _size; }
-    bool full() const volatile { return size() == N; }
-    bool empty() const volatile { return size() == 0; }
+    IDX size() const { return _size; }
+    bool full() const { return size() == N; }
+    bool empty() const { return size() == 0; }
     void clear() { _size = 0; }
     
     // Adding
-    bool append(const T &v) volatile {
+    bool append(const T &v) {
         if (full()) return false;
         
         _data[size()] = v;
@@ -43,7 +44,7 @@ public:
         ++_size;
         return true;
     }
-    bool append(const T *a, IDX length) volatile {
+    bool append(const T *a, IDX length) {
         if (length > N - size()) return false;
         
         memcpy(&_data[size()], a, sizeof(T) * length);
@@ -51,10 +52,10 @@ public:
         _size += length;
         return true;
     }
-    bool append(std::initializer_list<T> l) volatile {
+    bool append(std::initializer_list<T> l) {
         return append(l.begin(), static_cast<IDX>(l.size()));
     }
-    bool insert(const T &v, IDX i) volatile {
+    bool insert(const T &v, IDX i) {
         if (full() || i >= size()) return false;
         
         memcpy(&_data[i+1], &_data[i], sizeof(T) * (size() - i));
@@ -64,7 +65,7 @@ public:
         ++_size;
         return true;
     }
-    bool insert (const T *a, IDX length, IDX i) volatile {
+    bool insert (const T *a, IDX length, IDX i) {
         if (i >= size() || length > N - size())
             return false; // TODO: check this
         
@@ -74,21 +75,21 @@ public:
         _size += length;
         return true;
     }
-    bool insert(std::initializer_list<T> l, IDX i) volatile {
+    bool insert(std::initializer_list<T> l, IDX i) {
         return insert(l.begin(), static_cast<IDX>(l.size()), i);
     }
-    bool prepend(const T &v) volatile {
+    bool prepend(const T &v) {
         return insert(v, 0);
     }
-    bool prepend(std::initializer_list<T> l) volatile {
+    bool prepend(std::initializer_list<T> l) {
         return insert(l, 0);
     }
-    bool prepend(const T *a, IDX length) volatile {
+    bool prepend(const T *a, IDX length) {
         return insert(a, length, 0);
     }
     
     // Peeking
-    bool peek(T *v, IDX i) volatile {
+    bool peek(T *v, IDX i) {
         if (empty() || i >= size()) return false;
         
         (*v) = _data[i];
@@ -97,7 +98,7 @@ public:
     }
     
     // Removing
-    bool pop(T *v) volatile {
+    bool pop(T *v) {
         if (empty()) return false;
         
         (*v) = _data[size() - 1];
@@ -105,7 +106,7 @@ public:
         --_size;
         return true;
     }
-    bool remove(T *v, IDX i) volatile {
+    bool remove(T *v, IDX i) {
         if (!peek(v, i)) return false;
         
         if (i < size() - 1)
@@ -114,16 +115,16 @@ public:
         --_size;
         return true;
     }
-    bool pop_front(T *v) volatile {
+    bool pop_front(T *v) {
         return remove(v, 0);
     }
     
     // casting & data
-    const T * c_array() const volatile { return _data; }
+    const T * c_array() const { return _data; }
     
     // sorting
     template <typename Func>
-    void sort(Func score) volatile {
+    void sort(Func score) {
         static_assert(std::is_arithmetic<typename std::result_of<Func(T)>::type>::value,
                       "sort expects a function that returns an arithmetic type and takes one parameter of type T");
         typedef typename std::result_of<Func(T)>::type SCR;
@@ -150,7 +151,7 @@ public:
         }
     }
     template <typename Func>
-    void sort_distance(Func distance, T &v_start) volatile {
+    void sort_distance(Func distance, T &v_start) {
         // Check if Func is callable
         
         static_assert(std::is_arithmetic<typename std::result_of<Func(T, T)>::type>::value,
@@ -192,14 +193,14 @@ public:
         }
     }
     template <typename Func>
-    void sort_distance(Func distance) volatile {
+    void sort_distance(Func distance) {
         if (empty()) return;
         sort_distance<decltype(distance)>(distance, _data[0]);
     }
     
     // boolean tests
     template <typename Func>
-    bool any(Func test) volatile {
+    bool any(Func test) {
         static_assert(std::is_same<bool, typename std::result_of<Func(T)>::type>::value,
                       "any expects a function that returns a bool and takes two parameters of type T");
         for (IDX i = 0; i < size(); ++i) {
@@ -208,7 +209,7 @@ public:
         return false;
     }
     template <typename Func>
-    IDX bool_test(Func test) volatile {
+    IDX bool_test(Func test) {
         static_assert(std::is_same<bool, typename std::result_of<Func(T)>::type>::value,
                       "bool_test expects a function that returns a bool and takes two parameters of type T");
         IDX s = 0;
@@ -218,7 +219,7 @@ public:
         return s;
     }
     template <typename Func>
-    bool all(Func test) volatile {
+    bool all(Func test) {
         static_assert(std::is_same<bool, typename std::result_of<Func(T)>::type>::value,
                       "any expects a function that returns a bool and takes two parameters of type T");
         if (empty()) return false;
@@ -228,12 +229,12 @@ public:
         return true;
     }
     
-    bool compare(std::initializer_list<T> l) volatile {
+    bool compare(std::initializer_list<T> l) {
         if (size() != l.size()) return false;
         
         return memcmp(&_data[0], l.begin(), sizeof(T) * size()) == 0;
     }
-    bool compare(const T *a, IDX length) volatile {
+    bool compare(const T *a, IDX length) {
         if (size() != length) return false;
         
         return memcmp(&_data[0], a, sizeof(T) * size()) == 0;

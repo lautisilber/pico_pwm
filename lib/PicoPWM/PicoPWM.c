@@ -18,13 +18,13 @@ static inline bool pwm_has_init(struct PicoPWM *pwm)
     return pwm->init_flag && PWM_GLOBAL_INIT();
 }
 
-void pmw_pico_global_init()
+void pico_pmw_global_init()
 {
     if (PWM_GLOBAL_INIT()) return;
     pwm_source_clock_hz = clock_get_hz(clk_sys);
 }
 
-void pwm_pico_hw_enable(struct PicoPWM *pwm, bool enable)
+void pico_pmw_hw_enable(struct PicoPWM *pwm, bool enable)
 {
     if (!pwm_has_init(pwm) || pwm->pwm_hw_init == enable)
         return;
@@ -32,7 +32,7 @@ void pwm_pico_hw_enable(struct PicoPWM *pwm, bool enable)
     pwm->pwm_hw_init = enable;
 }
 
-void pwm_pico_init(struct PicoPWM *pwm, uint8_t pin, bool inverted)
+void pico_pmw_init(struct PicoPWM *pwm, uint8_t pin, bool inverted)
 {
     if (!PWM_GLOBAL_INIT())
         return;
@@ -92,7 +92,7 @@ static inline uint32_t ns_from_duty_cycle(uint32_t frequency, uint16_t wrap, uin
     return ns;
 }
 
-void pwm_pico_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle)
+void pico_pmw_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle)
 {
     // 0 <= duty_cycle <= 65535
     if (!pwm_has_init(pwm)) return;
@@ -106,10 +106,10 @@ void pwm_pico_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uin
 
     pwm->ns_per_cycle = ns_from_duty_cycle(pwm->freq, pwm->config_wrap, duty_cycle);
 
-    pwm_pico_hw_enable(pwm, true);
+    pico_pmw_hw_enable(pwm, true);
 }
 
-void pwm_pico_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle)
+void pico_pmw_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle)
 {
     if (!pwm_has_init(pwm)) return;
     pwm_set_duty(pwm, duty_cycle);
@@ -117,12 +117,12 @@ void pwm_pico_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle)
 
     pwm->ns_per_cycle = ns_from_duty_cycle(pwm->freq, pwm->config_wrap, duty_cycle);
 
-    pwm_pico_hw_enable(pwm, true);
+    pico_pmw_hw_enable(pwm, true);
 }
 
-void pwm_pico_set_duty_ns(struct PicoPWM *pwm, uint32_t ns)
+void pico_pmw_set_duty_ns(struct PicoPWM *pwm, uint32_t ns)
 {
     if (!pwm_has_init(pwm)) return;
     pwm->duty_cycle = duty_cycle_from_ns(pwm->freq, pwm->config_wrap, ns);
-    pwm_pico_set_duty_u16(pwm, pwm->duty_cycle);
+    pico_pmw_set_duty_u16(pwm, pwm->duty_cycle);
 }

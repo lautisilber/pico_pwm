@@ -111,11 +111,11 @@ bool PicoServo::attach() {
     return attach(DEFAULT_MIN_PULSE_WIDTH, DEFAULT_MAX_PULSE_WIDTH);
 }
 
-bool PicoServo::attach(int minUs, int maxUs) {
+bool PicoServo::attach(uint32_t minUs, uint32_t maxUs) {
     return attach(minUs, maxUs, _valueUs);
 }
 
-bool PicoServo::attach(int minUs, int maxUs, int value) {
+bool PicoServo::attach(uint32_t minUs, uint32_t maxUs, uint32_t value) {
     // keep the min and max within 200-3000 us, these are extreme
     // ranges and should support extreme servos while maintaining
     // reasonable ranges
@@ -164,17 +164,14 @@ void PicoServo::detach() {
     }
 }
 
-void PicoServo::write(int value) {
-    // treat any value less than 200 as angle in degrees (values equal or larger are handled as microseconds)
-    if (value < 200) {
-        // assumed to be 0-180 degrees servo
-        value = constrain(value, 0, 180);
-        value = improved_map(value, 0, 180, _minUs, _maxUs);
-    }
+void PicoServo::write(uint8_t angle) {
+    // assumed to be 0-180 degrees servo
+    uint32_t value = constrain(value, 0, 180);
+    value = improved_map(value, 0, 180, _minUs, _maxUs);
     writeMicroseconds(value);
 }
 
-void PicoServo::writeMicroseconds(int value) {
+void PicoServo::writeMicroseconds(uint32_t value) {
     value = constrain(value, _minUs, _maxUs);
     _valueUs = value;
     if (_attached) {

@@ -10,10 +10,11 @@
 #define LED_PIN 25
 
 #include "test_tasks.h"
+#include "stdio_stream.h"
 
 int main() {
-    JsonDocument doc;
     stdio_init_all();
+
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
 

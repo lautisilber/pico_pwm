@@ -18,21 +18,25 @@ if (NOT TARGET ArduinoJson)
     message(FATAL_ERROR "Didn't load ArduinoJson")
 endif()
 if (NOT TARGET PicoStepper)
-    message(FATAL_ERROR "Didn't load stepper")
+    message(FATAL_ERROR "Didn't load PicoStepper")
 endif()
 if (NOT TARGET PicoPWM)
     message(FATAL_ERROR "Didn't load PicoPWM")
+endif()
+if (NOT TARGET PicoServo)
+    message(FATAL_ERROR "Didn't load PicoServo")
 endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE
     pico_stdlib
     pico_time
     hardware_watchdog
-    
-    PicoStepper
-    PicoPWM
 )
 
 target_link_libraries(${LIB_NAME} PUBLIC
     ArduinoJson
+    
+    PicoStepper
+    PicoPWM
+    PicoServo
 )

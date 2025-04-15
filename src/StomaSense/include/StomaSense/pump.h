@@ -3,8 +3,22 @@
 
 #include <StomaSense/defs.h>
 
+#include <PicoPWM.h>
+#include <PicoStepper.h>
+#include <PicoServo.h>
+
 namespace StomaSense
 {
+    extern void delay_ms(time_ms_t ms);
+    
+    extern void mutex_watering_queue_access_claim_blocking();
+    extern void mutex_watering_queue_access_release();
+
+    extern void mutex_servo_claim_blocking();
+    extern void mutex_servo_release();
+
+    extern void mutex_stepper_claim_blocking();
+    extern void mutex_stepper_release();
 
     /// Watering data
 
@@ -25,6 +39,11 @@ namespace StomaSense
         WateringIntensity min_intensity;
         WateringIntensity max_intensity;
 
+        void interpolate(WateringIntensity *res, float t)
+        {
+            WateringIntensity::interpolate(res, &min_intensity, &max_intensity, t);
+        }
+
         float last_intensity_increase;
     };
 
@@ -42,7 +61,6 @@ namespace StomaSense
     struct Scale {
         scale_t scale_n;
         Position pos;
-        WateringData watering_data;
     };
 
     /// pump
@@ -50,6 +68,17 @@ namespace StomaSense
     namespace Pump
     {
         extern void init();
+        extern bool add_scale(const Scale *scale);
+        extern bool overwrite_scale(const Scale *scale, scale_t scale_n);
+
+        extern PicoStepper *get_stepper();
+        extern PicoPWM *get_pump();
+        extern PicoServo *get_servo();
+
+        extern bool add_scale_to_watering_queue(scale_t scale_n);
+        extern bool pop_next_target(scale_t *scale);
+
+        extern const Scale *water_next_target();
     }
 
 }

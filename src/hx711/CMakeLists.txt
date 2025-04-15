@@ -10,8 +10,8 @@ add_library(${LIB_NAME} STATIC
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # target_include_directories(${PROJECT_NAME} PRIVATE include)
 
-if (NOT TARGET welfords)
-    message(FATAL_ERROR "Didn't load BME280_SensorAPI")
+if (NOT TARGET Welfords)
+    message(FATAL_ERROR "Didn't load Welfords")
 endif()
 
 target_link_libraries(${LIB_NAME} PRIVATE
@@ -19,5 +19,5 @@ target_link_libraries(${LIB_NAME} PRIVATE
     hardware_gpio
 
     StomaSense
-    welfords
+    Welfords
 )

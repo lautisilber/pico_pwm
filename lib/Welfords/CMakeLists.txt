@@ -1,11 +1,8 @@
-set(LIB_NAME PicoServo)
-
+set(LIB_NAME Welfords)
 
 add_library(${LIB_NAME} STATIC
-    PicoServo.cpp
+    welfords.cpp
 )
-
-pico_generate_pio_header(${LIB_NAME} ${CMAKE_CURRENT_LIST_DIR}/pico_servo.pio)
 
 # target_sources(${LIB_NAME} PRIVATE )
 
@@ -14,8 +11,4 @@ target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${LIB_NAME} PRIVATE
     pico_stdlib
-)
-
-target_link_libraries(${LIB_NAME} PUBLIC
-    hardware_pio
 )

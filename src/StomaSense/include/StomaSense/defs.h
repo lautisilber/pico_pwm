@@ -11,6 +11,8 @@
 #define STOMA_SENSE_SCALES_MULTIPLEXER_N_PINS 4
 #define STOMA_SENSE_N_SCALES (2 << STOMA_SENSE_SCALES_MULTIPLEXER_N_PINS - 1)
 
+#define STOMA_SENSE_WATERING_QUEUE_SIZE 8
+
 #define STOMA_SENSE_STEPPER_MIN_POS std::numeric_limits<int32_t>::min()
 #define STOMA_SENSE_STEPPER_MAX_POS std::numeric_limits<int32_t>::max()
 #define STOMA_SENSE_SERVO_MAX_ANGLE 128
@@ -66,9 +68,12 @@ namespace StomaSense
     static_assert(STOMA_SENSE_MAX_WATERING_GOALS_STACK >= (1 << sizeof(watering_goal_idx_t)) - 1,
     "goal_idx_t type is not large enough to store STOMA_SENSE_MAX_WATER_PLANNING_STACK water planning goals");
     
-    extern time_ms_t millis() {
+    time_ms_t millis() {
         return to_ms_since_boot(get_absolute_time());
     }
+
+    extern void atomic_section_start();
+    extern void atomic_section_end();
 
     inline bool has_timer_elapsed(time_ms_t curr_millis, time_ms_t start_time, time_ms_t timedelta)
     {

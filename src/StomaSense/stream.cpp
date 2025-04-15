@@ -1,6 +1,7 @@
 #include <StomaSense/stream.h>
 
 #include <StomaSense/defs.h>
+#include <cstring>
 
 using namespace StomaSense;
 
@@ -45,4 +46,16 @@ size_t Stream::readBytes(char *buffer, size_t length)
         count++;
     }
     return count;
+}
+
+size_t Stream::print(const char *buf)
+{
+    return write((uint8_t *)buf, strlen(buf));
+}
+
+size_t Stream::println(const char *buf)
+{
+    size_t s = print(buf);
+    s += print("\n");
+    return s;
 }

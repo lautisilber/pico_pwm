@@ -32,13 +32,13 @@ struct PicoPWM
     uint16_t config_level;
 };
 
-extern void pmw_pico_global_init();
-extern void pwm_pico_init(struct PicoPWM *pwm, uint8_t pin, bool inverted);
-extern void pwm_pico_hw_enable(struct PicoPWM *pwm, bool enable);
+extern void pico_pmw_global_init();
+extern void pico_pwm_init(struct PicoPWM *pwm, uint8_t pin, bool inverted);
+extern void pico_pwm_hw_enable(struct PicoPWM *pwm, bool enable);
 
-extern void pwm_pico_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle);
-extern void pwm_pico_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle);
-extern void pwm_pico_set_duty_ns(struct PicoPWM *pwm, uint32_t ns);
+extern void pico_pwm_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle);
+extern void pico_pwm_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle);
+extern void pico_pwm_set_duty_ns(struct PicoPWM *pwm, uint32_t ns);
 
 #if __cplusplus
 }

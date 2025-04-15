@@ -5,7 +5,7 @@
 //  Created by Lautaro Silbergleit on 12/04/2025.
 //
 
-#include <Welfords/welfords.h>
+#include <welfords.h>
 #include <math.h>
 
 void Welfords::update(Welfords::Aggregate *agg, float new_value)

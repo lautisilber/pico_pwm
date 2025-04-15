@@ -1,5 +1,5 @@
 #include <hx711/hx711.h>
-#include <welfords/welfords.h>
+#include <welfords.h>
 #include <math.h>
 
 using namespace hx711;
