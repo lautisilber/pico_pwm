@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13...3.27)
 
-set(PROJECT_NAME StomaSense_rp2040)
+set(PROJECT_NAME StomaSense_rp2040_firmware)
+set(MAIN_TARGET_NAME StomaSense_rp2040)
+set(TEST_TARGET_NAME StomaSense_rp2040_test)
 
 # initialize pico-sdk from submodule
 # note: this must happen before project()

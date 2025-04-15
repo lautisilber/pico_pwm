@@ -68,9 +68,7 @@ namespace StomaSense
     static_assert(STOMA_SENSE_MAX_WATERING_GOALS_STACK >= (1 << sizeof(watering_goal_idx_t)) - 1,
     "goal_idx_t type is not large enough to store STOMA_SENSE_MAX_WATER_PLANNING_STACK water planning goals");
     
-    time_ms_t millis() {
-        return to_ms_since_boot(get_absolute_time());
-    }
+    extern time_ms_t millis();
 
     extern void atomic_section_start();
     extern void atomic_section_end();
