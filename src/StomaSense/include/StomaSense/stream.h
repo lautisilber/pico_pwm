@@ -15,7 +15,7 @@ namespace StomaSense {
         size_t write(const uint8_t *buffer, size_t length);
         size_t readBytes(char *buffer, size_t length);
 
-        virtual size_t available() = 0;
+        // virtual size_t available() = 0;
 
         size_t print(const char *buf);
         size_t println(const char *buf);

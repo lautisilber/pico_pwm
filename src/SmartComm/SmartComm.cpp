@@ -183,32 +183,11 @@ SmartCmdBase::SmartCmdBase(const char *command, smartCmdCB_t callback): _cmd(com
 
 SmartCmd::SmartCmd(const char *command, smartCmdCB_t callback): SmartCmdBase(command, callback) {}
 bool SmartCmd::is_command(const char *str) const { return strcmp(str, _cmd) == 0; }
-void SmartCmd::callback(Stream *stream, const SmartCmdArguments *args) const { _cb(stream, args, _cmd); }
+void SmartCmd::callback(printf_like_fn printf_like, const SmartCmdArguments *args) const { _cb(printf_like, args, _cmd); }
 
-#ifdef PROGMEM
-SmartCmdF::SmartCmdF(const PROGMEM char *command, smartCmdCB_t callback): SmartCmdBase(reinterpret_cast<PGM_P>(command), callback) {}
-bool SmartCmdF::is_command(const char *str) const { return strcmp_P(str, _cmd) == 0; }
-void SmartCmdF::callback(Stream *stream, const SmartCmdArguments *args) const
+void __defaultCommandNotRecognizedCB(printf_like_fn printf_like, const char *cmd)
 {
-    _smart_comm_size_t len = strlen_P((const char *)_cmd);
-    char *cmd = (char *)malloc(len);
-    strncpy_P(cmd, (const char *)_cmd, len);
-    _cb(stream, args, cmd);
-    free(cmd);
-}
-#endif
-
-void __defaultCommandNotRecognizedCB(Stream *stream, const char *cmd)
-{
-    #if defined(ARDUINO_ARCH_AVR)
-    stream->print(F("ERROR: Unknown command '"));
-    stream->print(cmd);
-    stream->println(F("'"));
-    #else
-    stream->print("ERROR: Unknown command '");
-    stream->print(cmd);
-    stream->println("'");
-    #endif
+    printf_like("ERROR: Unknown command '%s'\n", cmd);
 }
 
 
