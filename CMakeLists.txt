@@ -24,6 +24,9 @@ endif()
 if (NOT TARGET ArduinoJson)
     message(FATAL_ERROR "Didn't load ArduinoJson")
 endif()
+if (NOT TARGET PicoPWM)
+    message(FATAL_ERROR "Didn't load ArduinoJson")
+endif()
 
 # rest of your project
 add_subdirectory(src)

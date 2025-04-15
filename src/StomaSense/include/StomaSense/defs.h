@@ -8,7 +8,8 @@
 #include <limits>
 #include <type_traits>
 
-#define STOMA_SENSE_N_SCALES 16
+#define STOMA_SENSE_SCALES_MULTIPLEXER_N_PINS 4
+#define STOMA_SENSE_N_SCALES (2 << STOMA_SENSE_SCALES_MULTIPLEXER_N_PINS - 1)
 
 #define STOMA_SENSE_STEPPER_MIN_POS std::numeric_limits<int32_t>::min()
 #define STOMA_SENSE_STEPPER_MAX_POS std::numeric_limits<int32_t>::max()

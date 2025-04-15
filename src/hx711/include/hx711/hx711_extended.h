@@ -9,14 +9,17 @@
 #include <initializer_list>
 #include <math.h>
 
+
 namespace hx711 {
     namespace HX711Constants {
         // if STOMA_SENSE_N_SCALES = 16, n_multiplexers = 4
-        constexpr uint8_t n_multiplexers = static_cast<uint8_t>(log2(STOMA_SENSE_N_SCALES));
+        // constexpr uint8_t n_multiplexers = static_cast<uint8_t>(log2(STOMA_SENSE_N_SCALES));
+        constexpr uint8_t n_multiplexers = STOMA_SENSE_SCALES_MULTIPLEXER_N_PINS;
         static_assert(n_multiplexers <= std::numeric_limits<uint8_t>::max(), "n_multiplexers is greater than max(uint8_t). loops involving n_multiplexers won't work");
     }
 
     struct HX711CalibrationWithJson : public HX711Calibration, public StomaSense::Jsonifyable {
+        StomaSense::scale_t scale;
         void to_json(JsonObject *obj) const override;
         bool from_json(JsonObject *obj) override;
     };
@@ -31,11 +34,11 @@ namespace hx711 {
     
             void begin();
     
-            bool read_raw_stats(StomaSense::scale_t scale, uint32_t n, float *mean, float *stdev, uint32_t *resulting_n, uint32_t timeout_ms=5000);
-            bool read_calib_stats(uint32_t n, HX711CalibrationWithJson *calib, float *mean, float *stdev, uint32_t *resulting_n, uint32_t timeout_ms=5000);
+            bool read_raw_stats(StomaSense::scale_t scale, uint32_t n, float *mean, float *stdev, uint32_t *resulting_n, StomaSense::time_ms_t timeout_ms=5000);
+            bool read_calib_stats(uint32_t n, HX711CalibrationWithJson *calib, float *mean, float *stdev, uint32_t *resulting_n, StomaSense::time_ms_t timeout_ms=5000);
         
-            bool calib_offset(uint32_t n, HX711CalibrationWithJson *calib, uint32_t *resulting_n, uint32_t timeout_ms=5000);
-            bool calib_slope(uint32_t n, float weight, float weight_error, HX711CalibrationWithJson *calib, uint32_t *resulting_n, uint32_t timeout_ms=5000);
+            bool calib_offset(uint32_t n, HX711CalibrationWithJson *calib, uint32_t *resulting_n, StomaSense::time_ms_t timeout_ms=5000);
+            bool calib_slope(uint32_t n, float weight, float weight_error, HX711CalibrationWithJson *calib, uint32_t *resulting_n, StomaSense::time_ms_t timeout_ms=5000);
         };
 }
 
