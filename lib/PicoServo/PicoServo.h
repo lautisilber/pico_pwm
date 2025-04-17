@@ -40,24 +40,41 @@
 #ifndef _PICO_SERVO_H_
 #define _PICO_SERVO_H_
 
+#if __cplusplus
+extern "C" {
+#endif
+
 #include <pico/stdlib.h>
 #include <PicoPioPWM.h>
 
-// The following values are in us (microseconds).
-// Since the defaults can be overwritten in the new attach() member function,
-// they were modified from the Arduino AVR defaults to be in the safe range
-// of publicly available specifications. While this implies that many 180°
-// servos do not operate the full 0° to 180° sweep using these, it also prevents
-// unsuspecting damage. For Arduino AVR, the same change is being discussed.
-#define DEFAULT_MIN_PULSE_WIDTH      1000 // uncalibrated default, the shortest duty cycle sent to a servo
-#define DEFAULT_MAX_PULSE_WIDTH      2000 // uncalibrated default, the longest duty cycle sent to a servo 
-#define DEFAULT_NEUTRAL_PULSE_WIDTH  1500 // default duty cycle when servo is attached
-#define REFRESH_INTERVAL            20000 // classic default period to refresh servos in microseconds 
-#define MAX_SERVOS                      8 // number of PIO state machines available, assuming nobody else is using them
+struct PicoServo {
+    struct PicoPioPWM pwm;
 
-class PicoServo {
-    bool attach() { return true; }
-    void write(int a) {}
+    uint8_t angle;
+
+    uint32_t min_us;
+    uint32_t max_us;
+    uint8_t min_angle;
+    uint8_t max_angle;
 };
+
+extern bool pico_servo_init(struct PicoServo *servo, uint8_t pin, bool inverted);
+
+extern void pico_servo_set_min_max_us(struct PicoServo *servo, uint32_t min_us, uint32_t max_us);
+extern void pico_servo_set_min_max_angle(struct PicoServo *servo, uint8_t min_angle, uint8_t max_angle);
+
+extern bool pico_servo_attach(struct PicoServo *servo);
+extern bool pico_servo_release(struct PicoServo *servo);
+extern void pico_servo_deinit(struct PicoServo *servo);
+
+extern bool pico_servo_set_angle(struct PicoServo *servo, uint8_t angle);
+
+// should be initialized externally
+extern void pico_servo_delay_ms(uint32_t ms);
+extern bool pico_servo_sweep(struct PicoServo *servo, uint8_t goal_angle, uint32_t delay_ms, uint32_t resolution_us);
+
+#if __cplusplus
+}
+#endif
 
 #endif /* _PICO_SERVO_H_ */

@@ -2,7 +2,7 @@ set(LIB_NAME PicoServo)
 
 
 add_library(${LIB_NAME} STATIC
-    PicoServo.cpp
+    PicoServo.c
 )
 
 # target_sources(${LIB_NAME} PRIVATE )
