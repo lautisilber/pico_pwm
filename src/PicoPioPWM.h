@@ -6,16 +6,6 @@
 #include "hardware/clocks.h"
 #include "pwm.pio.h"
 
-#define max(a, b) \
-    ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
-#define min(a, b) \
-    ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
-#define constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
-
 #if __cplusplus
 extern "C" {
 #endif
