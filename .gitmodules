@@ -10,3 +10,6 @@
 [submodule "lib/BME280/BME280_SensorAPI"]
 	path = lib/BME280/BME280_SensorAPI
 	url = https://github.com/boschsensortec/BME280_SensorAPI.git
+[submodule "lib/PicoPioPWM"]
+	path = lib/PicoPioPWM
+	url = https://github.com/lautisilber/pico_pio_pwm.git

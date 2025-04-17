@@ -130,7 +130,7 @@ bool PicoServo::attach(uint32_t minUs, uint32_t maxUs, uint32_t value) {
         // }
 
         bool res = pio_program_prepare(_pio_program.pgm, &(_pio_program.pio), &(_pio_program.sm), &(_pio_program.offset), _pin);
-        return false;
+        if (!res) return false;
         
         _attached = true;
         servo_program_init(_pio_program.pio, _pio_program.sm, _pio_program.offset, _pin);

@@ -41,6 +41,10 @@ foreach(PN IN LISTS MAIN_TARGET_NAME TEST_TARGET_NAME)
         StomaSense
         SmartComm
 
+        PicoStepper
+        PicoServo
+        PicoPWM
+
         # tinyusb_device
         # tinyusb_board
     )

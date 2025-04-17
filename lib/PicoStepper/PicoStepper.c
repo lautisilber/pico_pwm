@@ -1,8 +1,8 @@
 #include "PicoStepper.h"
 
 #define abs(x) ((x)<0 ? (-x) : (x))
-// #define conditional_negation(i, invert) ((i)*((1-(invert)) - (invert)))
-#define conditional_negation(i, invert) ((invert) ? -(i) : (i))
+#define conditional_negation(i, invert) ((i)*((1-(invert)) - (invert)))
+// #define conditional_negation(i, invert) ((invert) ? -(i) : (i))
 #define cycle(v, min, max) (v > max ? min : (v < min ? max : v))
 #define STEPPER_STEP_DELAY_US 1000
 
@@ -37,11 +37,11 @@ static const bool step_half[8][4] = {
 static void make_step(struct PicoStepper *stepper, int8_t dir)
 {
     // int8_t step_dir = conditional_negation(dir, stepper->inverted);
-    int8_t step_dir;
-    if (stepper->inverted)
-        step_dir = -dir;
-    else
-        step_dir = dir;
+    int8_t step_dir = conditional_negation(dir, stepper->inverted);
+    // if (stepper->inverted)
+    //     step_dir = -dir;
+    // else
+    //     step_dir = dir;
     switch(stepper->step_type)
     {
     case PICO_STEPPER_STEP_TYPE_NORMAL: {
