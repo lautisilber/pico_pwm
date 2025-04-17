@@ -41,7 +41,7 @@
 #define _PICO_SERVO_H_
 
 #include <pico/stdlib.h>
-#include <hardware/pio.h>
+#include <PicoPioPWM.h>
 
 // The following values are in us (microseconds).
 // Since the defaults can be overwritten in the new attach() member function,
@@ -55,49 +55,9 @@
 #define REFRESH_INTERVAL            20000 // classic default period to refresh servos in microseconds 
 #define MAX_SERVOS                      8 // number of PIO state machines available, assuming nobody else is using them
 
-
 class PicoServo {
-public:
-    PicoServo(uint8_t pin);
-    ~PicoServo();
-
-    void init() const;
-
-    // attach the given pin to the next free channel, sets pinMode, returns channel number or 0 if failure.
-    // returns channel number or 0 if failure.
-    bool attach();
-
-    // attach the given pin to the next free channel, sets pinMode, min, and max values for write().
-    // returns channel number or 0 if failure.
-    bool attach(uint32_t min, uint32_t max);
-
-    // attach the given pin to the next free channel, sets pinMode, min, and max values for write(),
-    // and sets the initial value, the same as write().
-    // returns channel number or 0 if failure.
-    bool attach(uint32_t min, uint32_t max, uint32_t value);
-
-    void detach();
-    void write(uint8_t angle);              // if value is < 200 its treated as an angle, otherwise as pulse width in microseconds
-    void writeMicroseconds(uint32_t value); // Write pulse width in microseconds
-    bool attached();                        // return true if this servo is attached, otherwise false
-
-private:
-    bool     _attached = false;
-    const uint8_t  _pin;
-    uint32_t _minUs = DEFAULT_MIN_PULSE_WIDTH;
-    uint32_t _maxUs = DEFAULT_MAX_PULSE_WIDTH;
-    uint32_t _valueUs = DEFAULT_NEUTRAL_PULSE_WIDTH;
-
-    struct PIOProgram
-    {
-        const pio_program_t *pgm;
-        PIO pio = nullptr;
-        uint sm = 0;
-        uint offset = 0;
-
-        PIOProgram(const pio_program_t *_pgm) : pgm(_pgm) {}
-    };
-    PIOProgram _pio_program;
+    bool attach() { return true; }
+    void write(int a) {}
 };
 
 #endif /* _PICO_SERVO_H_ */
