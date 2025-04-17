@@ -10,14 +10,14 @@ using namespace StomaSense;
 
 static PicoStepper stepper;
 static PicoPWM pump;
-static PicoServo servo(SERVO_PIN);
+static PicoServo servo = {};
 
 static Scale scales[STOMA_SENSE_N_SCALES];
 static size_t n_scales = 0;
 
 static Array<scale_t, uint8_t, STOMA_SENSE_WATERING_QUEUE_SIZE> watering_queue;
 
-void Pump::init()
+bool Pump::init()
 {
     mutex_stepper_claim_blocking();
     pico_stepper_init(
@@ -30,8 +30,9 @@ void Pump::init()
     pico_pwm_set_freq_and_duty_u16(&pump, 100'000, 0);
 
     mutex_servo_claim_blocking();
-    servo.init();
+    bool res = pico_servo_init(&servo, SERVO_PIN, true);
     mutex_servo_release();
+    return res;
 }
 
 bool add_scale(const Scale *scale)
@@ -129,13 +130,13 @@ const Scale *water_next_target()
 
     // lock servo to 90
     mutex_servo_claim_blocking();
-    if (!servo.attach())
+    if (!pico_servo_attach(&servo))
     {
         STOMASENSE_ERROR("couldn't attach servo");
         mutex_servo_release();
         return nullptr;
     }
-    servo.write(90);
+    pico_servo_set_angle(&servo, 90);
     mutex_servo_release();
 
     // move stepper
@@ -146,13 +147,12 @@ const Scale *water_next_target()
 
     // move and lock servo
     mutex_servo_claim_blocking();
-    if (!servo.attach())
+    if (!pico_servo_sweep(&servo, scale->pos.servo, 10, 10))
     {
         STOMASENSE_ERROR("couldn't attach servo");
         mutex_servo_release();
         return nullptr;
     }
-    servo.write(scale->pos.servo);
     mutex_stepper_release();
 
     // pump
@@ -167,14 +167,13 @@ const Scale *water_next_target()
 
     // release servo
     mutex_servo_claim_blocking();
-    if (!servo.attach())
+    if (!pico_servo_sweep(&servo, 90, 10, 10))
     {
         STOMASENSE_ERROR("couldn't attach servo");
         mutex_servo_release();
         return nullptr;
     }
-    servo.write(0);
-    servo.detach();
+    pico_servo_release(&servo);
     mutex_stepper_release();
 
     return scale;

@@ -40,7 +40,7 @@ void pico_servo_set_min_max_angle(struct PicoServo *servo, uint8_t min_angle, ui
 
 bool pico_servo_attach(struct PicoServo *servo)
 {
-    pio_pwm_set_period_us(&servo->pwm, SERVO_PERIOD_US);
+    return pico_pio_pwm_set_period_us(&servo->pwm, SERVO_PERIOD_US);
 }
 
 bool pico_servo_release(struct PicoServo *servo)
@@ -81,9 +81,11 @@ bool pico_servo_sweep(struct PicoServo *servo, uint8_t goal_angle, uint32_t dela
                       (uint32_t)servo->max_angle, servo->min_us, servo->max_us);
         for (int32_t us = curr_us; (dir > 0 ? us < next_us : us > next_us); us += (dir * (int32_t)resolution_us))
         {
-            pico_pio_pwm_set_duty_ns(&servo->pwm, us);
+            pico_pio_pwm_set_duty_us(&servo->pwm, us);
+            pico_servo_delay_ms(delay_ms);
         }
-        pico_pio_pwm_set_duty_ns(&servo->pwm, next_us);
+        pico_pio_pwm_set_duty_us(&servo->pwm, next_us);
+        pico_servo_delay_ms(delay_ms);
         curr_us = next_us;
     }
     return true;

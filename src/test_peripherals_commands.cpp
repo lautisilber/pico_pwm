@@ -24,6 +24,11 @@ void pico_stepper_delay_us(uint32_t us)
     sleep_us(us);
 }
 
+void pico_servo_delay_ms(uint32_t ms)
+{
+    sleep_ms(ms);
+}
+
 using namespace StomaSense;
 
 // // create the "OK" command which only answers with "OK"
@@ -51,7 +56,7 @@ using namespace StomaSense;
 
 static PicoStepper stepper;
 static PicoPWM pump;
-static PicoServo servo(SERVO_PIN);
+static PicoServo servo = {};
 
 void test_stepper()
 {
@@ -84,23 +89,18 @@ void test_pump()
 void test_servo()
 {
     printf("Servo test start\n");
-    PicoServo servo(SERVO_PIN);
+    pico_servo_init(&servo, SERVO_PIN, true);
     
-    bool r = servo.attach();
+    bool r = pico_servo_attach(&servo);
     printf("Servo attach %s\n", (r ? "true" : "false"));
     if (!r) return;
 
-    servo.write(90);
-    sleep_ms(500);
-    servo.write(100);
-    sleep_ms(500);
-    servo.write(90);
-    sleep_ms(500);
-    servo.write(89);
-    sleep_ms(500);
-    servo.write(90);
-
-    servo.detach();
+    pico_servo_set_angle(&servo, 90);
+    pico_servo_sweep(&servo, 120, 10, 10);
+    pico_servo_release(&servo);
+    pico_servo_sweep(&servo, 60, 10, 10);
+    pico_servo_sweep(&servo, 90, 10, 10);
+    pico_servo_deinit(&servo);
 }
 
 int main()

@@ -67,7 +67,7 @@ namespace StomaSense
 
     namespace Pump
     {
-        extern void init();
+        extern bool init();
         extern bool add_scale(const Scale *scale);
         extern bool overwrite_scale(const Scale *scale, scale_t scale_n);
 
