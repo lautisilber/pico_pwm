@@ -10,7 +10,7 @@
      _a < _b ? _a : _b; })
 
 // Write `period` to the input shift register
-static inline bool pio_pwm_set_period(struct PicoPioPWM *pwm, uint32_t period)
+static inline bool pico_pio_pwm_set_period(struct PicoPioPWM *pwm, uint32_t period)
 {
     if (!pwm->claimed) return false;
     pio_sm_set_enabled(pwm->pio, pwm->sm, false);
@@ -23,7 +23,7 @@ static inline bool pio_pwm_set_period(struct PicoPioPWM *pwm, uint32_t period)
 }
 
 // Write `level` to TX FIFO. State machine will copy this into X.
-static inline bool pio_pwm_set_level(struct PicoPioPWM *pwm, uint32_t level)
+static inline bool pico_pio_pwm_set_level(struct PicoPioPWM *pwm, uint32_t level)
 {
     if (!pwm->claimed) return false;
     pio_sm_put_blocking(pwm->pio, pwm->sm, (pwm->inverted ? pwm->period - level : level));
@@ -62,7 +62,7 @@ bool pico_pio_pwm_init(struct PicoPioPWM *pwm, uint8_t pin, bool inverted)
 bool pico_pio_pwm_release(struct PicoPioPWM *pwm)
 {
     if (!pwm->claimed) return false;
-    pio_pwm_set_level(pwm, 0);
+    pico_pio_pwm_set_level(pwm, 0);
     return true;
 }
 
@@ -105,18 +105,18 @@ static inline uint32_t us_to_pwm_pio_program_cycles(uint32_t us)
     return n_pwm_pio_cycles;
 }
 
-bool pio_pwm_set_period_us(struct PicoPioPWM *pwm, uint32_t period_us)
+bool pico_pio_pwm_set_period_us(struct PicoPioPWM *pwm, uint32_t period_us)
 {
     if (!pwm->claimed) return false;
     const uint32_t period = us_to_pwm_pio_program_cycles(period_us);
-    pio_pwm_set_period(pwm, period);
+    pico_pio_pwm_set_period(pwm, period);
     return true;
 }
 
-bool pio_pwm_set_duty_us(struct PicoPioPWM *pwm, uint32_t duty_us)
+bool pico_pio_pwm_set_duty_us(struct PicoPioPWM *pwm, uint32_t duty_us)
 {
     if (!pwm->claimed) return false;
     const uint32_t level = us_to_pwm_pio_program_cycles(duty_us);
-    pio_pwm_set_level(pwm, min(level, pwm->period));
+    pico_pio_pwm_set_level(pwm, min(level, pwm->period));
     return true;
 }
