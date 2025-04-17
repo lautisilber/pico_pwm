@@ -1,5 +1,14 @@
 #include "PicoPioPWM.h"
 
+#define max(a, b) \
+    ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+#define min(a, b) \
+    ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 // Write `period` to the input shift register
 static inline bool pio_pwm_set_period(struct PicoPioPWM *pwm, uint32_t period)
 {
