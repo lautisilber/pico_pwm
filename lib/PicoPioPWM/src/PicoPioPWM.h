@@ -28,8 +28,8 @@ extern bool pico_pio_pwm_init(struct PicoPioPWM *pwm, uint8_t pin, bool inverted
 extern bool pico_pio_pwm_release(struct PicoPioPWM *pwm);
 extern void pico_pio_pwm_deinit(struct PicoPioPWM *pwm);
 
-extern bool pio_pwm_set_period_us(struct PicoPioPWM *pwm, uint32_t period_us);
-extern bool pio_pwm_set_duty_us(struct PicoPioPWM *pwm, uint32_t duty_us);
+extern bool pico_pio_pwm_set_period_us(struct PicoPioPWM *pwm, uint32_t period_us);
+extern bool pico_pio_pwm_set_duty_us(struct PicoPioPWM *pwm, uint32_t duty_us);
 
 #if __cplusplus
 }

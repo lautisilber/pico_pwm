@@ -29,16 +29,16 @@ int main()
             printf("ERROR %lu\n", __LINE__);
             return 1;
         }
-        pio_pwm_set_period_us(&pwm, period_us);
+        pico_pio_pwm_set_period_us(&pwm, period_us);
         for (uint32_t i = duty_us_min; i <= duty_us_max; i += step)
         {
-            pio_pwm_set_duty_us(&pwm, i);
+            pico_pio_pwm_set_duty_us(&pwm, i);
         }
         pico_pio_pwm_release(&pwm);
         sleep_ms(2000);
         for (uint32_t i = duty_us_max; i >= duty_us_min; i -= step)
         {
-            pio_pwm_set_duty_us(&pwm, i);
+            pico_pio_pwm_set_duty_us(&pwm, i);
         }
         pico_pio_pwm_deinit(&pwm);
         sleep_ms(500);
