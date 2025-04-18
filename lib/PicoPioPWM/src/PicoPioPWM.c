@@ -68,7 +68,7 @@ bool pico_pio_pwm_release(struct PicoPioPWM *pwm)
 
 void pico_pio_pwm_deinit(struct PicoPioPWM *pwm)
 {
-    if (pwm->claimed) return;
+    if (!pico_pio_pwm_release(pwm)) return;
     pio_remove_program_and_unclaim_sm(&pwm_program, pwm->pio, pwm->sm, pwm->offset);
     pwm->claimed = false;
 }

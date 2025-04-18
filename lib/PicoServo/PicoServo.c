@@ -1,4 +1,5 @@
 #include <PicoServo.h>
+#include <stdio.h>
 
 #define SERVO_DEFAULT_MIN_PULSE_WIDTH_US 1000 // uncalibrated default, the shortest duty cycle sent to a servo
 #define SERVO_DEFAULT_MAX_PULSE_WIDTH_US 2000 // uncalibrated default, the longest duty cycle sent to a servo
@@ -10,6 +11,8 @@
 #define clamp(v, left, right) ((v) > (right) ? (right) : ((v) < (left) ? (left) : (v)))
 #define map(v, in_min, in_max, out_min, out_max) \
     (((v) - (in_min)) * ((out_max) - (out_min)) / ((in_max) - (in_min)) + (out_min))
+
+
 
 bool pico_servo_init(struct PicoServo *servo, uint8_t pin, bool inverted)
 {
@@ -53,12 +56,24 @@ void pico_servo_deinit(struct PicoServo *servo)
     pico_pio_pwm_deinit(&servo->pwm);
 }
 
+static inline uint32_t pico_servo_angle_to_us(struct PicoServo *servo, uint8_t angle)
+{
+    return map((uint32_t)angle, (uint32_t)servo->min_angle, (uint32_t)servo->max_angle,
+               servo->min_us, servo->max_us);
+
+    // mapping
+    // uint32_t dx = (uint32_t)servo->min_angle - (uint32_t)servo->max_angle;
+    // uint32_t in_span = (uint32_t)servo->max_angle - (uint32_t)servo->min_angle;
+    // uint32_t out_span = servo->max_us - servo->min_us;
+    // return (dx * out_span) / in_span + servo->min_us;
+}
+
 bool pico_servo_set_angle(struct PicoServo *servo, uint8_t angle)
 {
     angle = clamp(angle, servo->min_angle, servo->max_angle);
-    uint32_t period = map((uint32_t)angle, (uint32_t)servo->min_angle, (uint32_t)servo->max_angle,
-                          servo->min_us, servo->max_us);
-    bool res = pico_pio_pwm_set_period_us(&servo->pwm, period);
+    const uint32_t duty_us = pico_servo_angle_to_us(servo, angle);
+    // bool res = pico_pio_pwm_set_period_us(&servo->pwm, period);
+    bool res = pico_pio_pwm_set_duty_us(&servo->pwm, duty_us);
     if (res)
         servo->angle = angle;
     return res;
@@ -69,24 +84,47 @@ bool pico_servo_sweep(struct PicoServo *servo, uint8_t goal_angle, uint32_t dela
     if (!servo->pwm.claimed)
         return false;
 
-    int8_t dir = (goal_angle > servo->angle ? 1 : -1);
-    uint8_t curr_angle = servo->angle;
-    uint8_t total_angles = (dir ? goal_angle - curr_angle : curr_angle - goal_angle);
-    uint32_t curr_us = map((uint32_t)curr_angle, (uint32_t)servo->min_angle,
-                           (uint32_t)servo->max_angle, servo->min_us, servo->max_us);
-    uint32_t next_us;
-    for (uint8_t i = 0; i < total_angles; ++i)
+    if (servo->angle == goal_angle) return true;
+    
+    int32_t curr_us = pico_servo_angle_to_us(servo, servo->angle);
+    int32_t final_us = pico_servo_angle_to_us(servo, goal_angle);
+    const int8_t dir = (goal_angle > servo->angle ? 1 : -1);
+    const int32_t step =  (int32_t)dir * resolution_us;
+
+    for (int32_t us = curr_us; (dir > 0 && us < final_us) || (dir < 0 && us > final_us); us += step)
     {
-        next_us = map((uint32_t)(curr_angle + dir), (uint32_t)servo->min_angle,
-                      (uint32_t)servo->max_angle, servo->min_us, servo->max_us);
-        for (int32_t us = curr_us; (dir > 0 ? us < next_us : us > next_us); us += (dir * (int32_t)resolution_us))
-        {
-            pico_pio_pwm_set_duty_us(&servo->pwm, us);
-            pico_servo_delay_ms(delay_ms);
-        }
-        pico_pio_pwm_set_duty_us(&servo->pwm, next_us);
+        printf("sweep us: %lu\n", us);
+        pico_pio_pwm_set_duty_us(&servo->pwm, us);
         pico_servo_delay_ms(delay_ms);
-        curr_us = next_us;
     }
+
+    pico_servo_set_angle(servo, goal_angle);
     return true;
+
+    // const int8_t dir = (goal_angle > servo->angle ? 1 : -1);
+    // const bool sub_angle_definition = (resolution_us < pico_servo_angle_to_us(servo, 1));
+
+    // uint8_t next_angle;
+    // while (servo->angle != goal_angle)
+    // {
+    //     next_angle = servo->angle + dir;
+    //     if (sub_angle_definition)
+    //     {
+    //         int32_t us_step = (int32_t)((dir) * ((int32_t)resolution_us));
+    //         printf("a (%li)\n", us_step);
+    //         int32_t next_us = pico_servo_angle_to_us(servo, next_angle);
+    //         for (int32_t us = pico_servo_angle_to_us(servo, servo->angle);
+    //              (dir > 0 && us < next_us-1) || (dir < 0 && us > next_us+1);
+    //              us += us_step)
+    //         {
+    //             printf("sweep us: %lu\n", us);
+    //             pico_pio_pwm_set_duty_us(&servo->pwm, us);
+    //             pico_servo_delay_ms(delay_ms);
+    //         }
+    //     }
+
+    //     printf("sweep us: %lu\n", pico_servo_angle_to_us(servo, next_angle));
+    //     pico_servo_set_angle(servo, next_angle);
+    //     pico_servo_delay_ms(delay_ms);
+    // }
 }

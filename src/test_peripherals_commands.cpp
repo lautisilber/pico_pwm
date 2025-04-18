@@ -95,11 +95,15 @@ void test_servo()
     printf("Servo attach %s\n", (r ? "true" : "false"));
     if (!r) return;
 
+    const uint32_t delay_ms = 20, resolution_us = 5;
+
     pico_servo_set_angle(&servo, 90);
-    pico_servo_sweep(&servo, 120, 10, 10);
+    pico_servo_sweep(&servo, 180, delay_ms, resolution_us);
     pico_servo_release(&servo);
-    pico_servo_sweep(&servo, 60, 10, 10);
-    pico_servo_sweep(&servo, 90, 10, 10);
+    sleep_ms(500);
+    pico_servo_sweep(&servo, 0, delay_ms, resolution_us);
+    sleep_ms(500);
+    pico_servo_sweep(&servo, 90, delay_ms, resolution_us);
     pico_servo_deinit(&servo);
 }
 
