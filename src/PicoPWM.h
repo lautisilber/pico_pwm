@@ -1,5 +1,5 @@
-#ifndef _PICO_PIO_PWM_H_
-#define _PICO_PIO_PWM_H_
+#ifndef _PICO_PWM_H_
+#define _PICO_PWM_H_
 
 #include "pico/stdlib.h"
 
@@ -41,4 +41,4 @@ extern void pico_pwm_set_duty_ns(struct PicoPWM *pwm, uint32_t ns);
 }
 #endif
 
-#endif /* _PICO_PIO_PWM_H_ */
+#endif /* _PICO_PWM_H_ */
