@@ -2,6 +2,7 @@
 #define _PICO_PWM_H_
 
 #include "pico/stdlib.h"
+#include "pico/sync.h"
 
 #if __cplusplus
 extern "C" {
@@ -27,15 +28,22 @@ struct PicoPWM
     uint16_t config_wrap;
     uint32_t config_divider16;
     uint16_t config_level;
+
+    // mutex
+    mutex_t mux;
 };
 
 extern void pico_pmw_global_init();
 extern void pico_pwm_init(struct PicoPWM *pwm, uint8_t pin, bool inverted);
-extern void pico_pwm_hw_enable(struct PicoPWM *pwm, bool enable);
+extern bool pico_pwm_hw_enable_unsafe(struct PicoPWM *pwm, bool enable);
+extern bool pico_pwm_hw_enable(struct PicoPWM *pwm, bool enable);
 
-extern void pico_pwm_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle);
-extern void pico_pwm_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle);
-extern void pico_pwm_set_duty_ns(struct PicoPWM *pwm, uint32_t ns);
+extern bool pico_pwm_set_freq_and_duty_u16_unsafe(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle);
+extern bool pico_pwm_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle);
+extern bool pico_pwm_set_duty_u16_unsafe(struct PicoPWM *pwm, uint16_t duty_cycle);
+extern bool pico_pwm_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle);
+extern bool pico_pwm_set_duty_ns_unsafe(struct PicoPWM *pwm, uint32_t ns);
+extern bool pico_pwm_set_duty_ns(struct PicoPWM *pwm, uint32_t ns);
 
 #if __cplusplus
 }
