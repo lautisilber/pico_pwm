@@ -22,7 +22,7 @@
 static uint32_t pwm_source_clock_hz = 0;
 #define PWM_GLOBAL_INIT() (pwm_source_clock_hz != 0)
 
-static inline bool pwm_has_init_unsafe(struct PicoPWM *pwm)
+static inline bool pwm_has_init(struct PicoPWM *pwm)
 {
     return pwm->init_flag && PWM_GLOBAL_INIT();
 }
@@ -33,19 +33,19 @@ void pico_pwm_global_init()
     pwm_source_clock_hz = clock_get_hz(clk_sys);
 }
 
-bool pico_pwm_hw_enable_unsafe(struct PicoPWM *pwm, bool enable)
+bool pico_pwm_hw_enable(struct PicoPWM *pwm, bool enable)
 {
-    if (!pwm_has_init_unsafe(pwm) || pwm->pwm_hw_init == enable)
+    if (!pwm_has_init(pwm) || pwm->pwm_hw_init == enable)
         return false;
     pwm_set_enabled(pwm->slice_num, enable);
     pwm->pwm_hw_init = enable;
     return true;
 }
 
-bool pico_pwm_hw_enable(struct PicoPWM *pwm, bool enable)
+bool pico_pwm_hw_enable_safe(struct PicoPWM *pwm, bool enable)
 {
     if (!mutex_enter_timeout_ms(&pwm->mux, 1000)) return false;
-    bool res = pico_pwm_hw_enable_unsafe(pwm, enable);
+    bool res = pico_pwm_hw_enable(pwm, enable);
     mutex_exit(&pwm->mux);
     return true;
 }
@@ -78,7 +78,7 @@ static inline void pwm_get_div_int_frac_from_div16(uint8_t *div_int, uint8_t *di
     *div_frac = (uint8_t)(divider16 & 0xF);
 }
 
-static void inline pwm_set_duty_unsafe(struct PicoPWM *pwm, uint16_t d)
+static void inline pwm_set_duty(struct PicoPWM *pwm, uint16_t d)
 {
     pwm->duty_cycle = d;
     pwm->config_level = (uint16_t)(pwm->config_wrap * d / MAX_UINT16_T);
@@ -86,7 +86,7 @@ static void inline pwm_set_duty_unsafe(struct PicoPWM *pwm, uint16_t d)
         pwm->config_level = pwm->config_wrap - pwm->config_level;
 }
 
-static void pwm_set_freq_duty_unsafe(struct PicoPWM *pwm, uint32_t f, uint16_t d)
+static void pwm_set_freq_duty(struct PicoPWM *pwm, uint32_t f, uint16_t d)
 {
     // https://www.i-programmer.info/programming/hardware/14849-the-pico-in-c-basic-pwm.html?start=2
     if (!PWM_GLOBAL_INIT()) return;
@@ -97,7 +97,7 @@ static void pwm_set_freq_duty_unsafe(struct PicoPWM *pwm, uint32_t f, uint16_t d
     pwm->config_divider16 = 16;
     pwm->config_wrap = (uint16_t)(pwm_source_clock_hz * 16 / pwm->config_divider16 / f - 1);
     // pwm->config_level = (uint16_t)(pwm->config_wrap * d / 100);
-    pwm_set_duty_unsafe(pwm, d);
+    pwm_set_duty(pwm, d);
 }
 
 static inline uint16_t duty_cycle_from_ns(uint32_t frequency, uint16_t wrap, uint32_t ns)
@@ -116,11 +116,11 @@ static inline uint32_t ns_from_duty_cycle(uint32_t frequency, uint16_t wrap, uin
     return ns;
 }
 
-bool pico_pwm_set_freq_and_duty_u16_unsafe(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle)
+bool pico_pwm_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle)
 {
     // 0 <= duty_cycle <= 65535
-    if (!pwm_has_init_unsafe(pwm)) return false;
-    pwm_set_freq_duty_unsafe(pwm, frequency, duty_cycle);
+    if (!pwm_has_init(pwm)) return false;
+    pwm_set_freq_duty(pwm, frequency, duty_cycle);
 
     uint8_t div_int, div_frac;
     pwm_get_div_int_frac_from_div16(&div_int, &div_frac, pwm->config_divider16);
@@ -134,18 +134,10 @@ bool pico_pwm_set_freq_and_duty_u16_unsafe(struct PicoPWM *pwm, uint32_t frequen
     return true;
 }
 
-bool pico_pwm_set_freq_and_duty_u16(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle)
+bool pico_pwm_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle)
 {
-    if (!mutex_enter_timeout_ms(&pwm->mux, 1000)) return false;
-    bool res = pico_pwm_set_freq_and_duty_u16_unsafe(pwm, frequency, duty_cycle);
-    mutex_exit(&pwm->mux);
-    return res;
-}
-
-bool pico_pwm_set_duty_u16_unsafe(struct PicoPWM *pwm, uint16_t duty_cycle)
-{
-    if (!pwm_has_init_unsafe(pwm)) return false;
-    pwm_set_duty_unsafe(pwm, duty_cycle);
+    if (!pwm_has_init(pwm)) return false;
+    pwm_set_duty(pwm, duty_cycle);
     pwm_set_chan_level(pwm->slice_num, pwm->channel, pwm->config_level);
 
     pwm->ns_per_cycle = ns_from_duty_cycle(pwm->freq, pwm->config_wrap, duty_cycle);
@@ -154,26 +146,34 @@ bool pico_pwm_set_duty_u16_unsafe(struct PicoPWM *pwm, uint16_t duty_cycle)
     return true;
 }
 
-bool pico_pwm_set_duty_u16(struct PicoPWM *pwm, uint16_t duty_cycle)
+bool pico_pwm_set_duty_ns(struct PicoPWM *pwm, uint32_t ns)
 {
-    if (!mutex_enter_timeout_ms(&pwm->mux, 1000)) return false;
-    bool res = pico_pwm_set_duty_u16_unsafe(pwm, duty_cycle);
-    mutex_exit(&pwm->mux);
-    return res;
-}
-
-bool pico_pwm_set_duty_ns_unsafe(struct PicoPWM *pwm, uint32_t ns)
-{
-    if (!pwm_has_init_unsafe(pwm)) return false;
+    if (!pwm_has_init(pwm)) return false;
     pwm->duty_cycle = duty_cycle_from_ns(pwm->freq, pwm->config_wrap, ns);
     pico_pwm_set_duty_u16(pwm, pwm->duty_cycle);
     return true;
 }
 
-bool pico_pwm_set_duty_ns(struct PicoPWM *pwm, uint32_t ns)
+bool pico_pwm_set_freq_and_duty_u16_safe(struct PicoPWM *pwm, uint32_t frequency, uint16_t duty_cycle)
 {
     if (!mutex_enter_timeout_ms(&pwm->mux, 1000)) return false;
-    bool res = pico_pwm_set_duty_ns_unsafe(pwm, ns);
+    bool res = pico_pwm_set_freq_and_duty_u16(pwm, frequency, duty_cycle);
+    mutex_exit(&pwm->mux);
+    return res;
+}
+
+bool pico_pwm_set_duty_u16_safe(struct PicoPWM *pwm, uint16_t duty_cycle)
+{
+    if (!mutex_enter_timeout_ms(&pwm->mux, 1000)) return false;
+    bool res = pico_pwm_set_duty_u16(pwm, duty_cycle);
+    mutex_exit(&pwm->mux);
+    return res;
+}
+
+bool pico_pwm_set_duty_ns_safe(struct PicoPWM *pwm, uint32_t ns)
+{
+    if (!mutex_enter_timeout_ms(&pwm->mux, 1000)) return false;
+    bool res = pico_pwm_set_duty_ns(pwm, ns);
     mutex_exit(&pwm->mux);
     return res;
 }
