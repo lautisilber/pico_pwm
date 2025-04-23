@@ -19,18 +19,18 @@ int main()
     const uint32_t step = 5;
 
     pico_pwm_init(&pwm, PIN, false);
-    pico_pwm_set_freq_and_duty_u16(&pwm, 1000000, 0);
+    pico_pwm_set_freq_and_duty_u16_safe(&pwm, 1000000, 0);
     sleep_ms(500);
     for (;;)
     {
         for (uint16_t i = 0; i < max_u16; ++i)
         {
-            pico_pwm_set_duty_u16(&pwm, i);
+            pico_pwm_set_duty_u16_safe(&pwm, i);
             sleep_us(delay_us);
         }
         for (uint16_t i = max_u16; i > 0; --i)
         {
-            pico_pwm_set_duty_u16(&pwm, i);
+            pico_pwm_set_duty_u16_safe(&pwm, i);
             sleep_us(delay_us);
         }
     }
