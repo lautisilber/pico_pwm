@@ -33,7 +33,7 @@ struct PicoPWM
     mutex_t mux;
 };
 
-extern void pico_pmw_global_init();
+extern void pico_pwm_global_init();
 extern void pico_pwm_init(struct PicoPWM *pwm, uint8_t pin, bool inverted);
 extern bool pico_pwm_hw_enable(struct PicoPWM *pwm, bool enable);
 
